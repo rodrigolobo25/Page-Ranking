@@ -4,70 +4,60 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 #include <vector>
 
 using namespace std;
 using std::string;
 
-class Node {
-private:
-	string name;
-	int id;
-	double rank;
-	int outdegree = 0;
-	Node* next = NULL;
-	Node* temp = next;
+Node::Node(string n, int i) {
+	name = n;
+	id = i;
+}
 
-public:
-	Node(string n, int i) {
-		name = n;
-		id = i;
+Node* Node::getnext() {
+	return next;
+}
+
+string Node::getname() {
+	return name;
+}
+
+int Node::getid() {
+	return id;
+}
+
+void Node::setnext(Node n) {
+	temp = next;
+	outdegree++;
+	rank = pow(outdegree, -1);
+	if (temp == NULL) {
+		Node *p = new Node(n.getname(), n.getid());
+		next = p;
+	}
+	else
+		temp->setnext(n);
+}
+
+vector<double> Node::inter(double r, int V) {
+
+	/*this method determines the number of pages linked to this node and returns
+	the result of the multiplication between this node's rank and the corrsponding
+	value on matrix r(t)
+	*/
+
+	temp = next;
+	vector <double> results(V);
+	double num = rank * r;
+
+	//every id located returns the value num on that index of r(t)
+	while (temp != NULL) {
+		results[temp->getid() - 1] = num;
+		temp = temp->getnext();
 	}
 
-	Node* getnext() {
-		return next;
-	}
-
-	string getname() {
-		return name;
-	}
-
-	int getid() {
-		return id;
-	}
-
-	void setnext(Node n) {
-		temp = next;
-		outdegree++;
-		rank = pow(outdegree, -1);
-		if (temp == NULL) {
-			Node *p = new Node(n.getname(), n.getid());
-			next = p;
-		}else
-			temp->setnext(n);
-	}
-
-	vector<double> inter(double r, int V) {
-		
-		/*this method determines the number of pages linked to this node and returns
-		the result of the multiplication between this node's rank and the corrsponding
-		value on matrix r(t)
-		*/
-
-		temp = next;
-		vector <double> results(V);
-		double num = rank * r;
-		
-		//every id located returns the value num on that index of r(t)
-		while (temp != NULL) {
-			results[temp->getid() - 1] = num;
-			temp = temp->getnext();
-		}
-		
-		return results;
-	}
-
-};
+	return results;
+}
 
 int main() {
 
@@ -175,23 +165,20 @@ int main() {
 		}
 		else {
 			list[j].setnext(list[r]);
-			id++;
 		}
 	}
 
 	int V = list.size();
 
 	//table of URLs. Using an array
-	string* data = new string[V];
+	vector<string> data(V);
 
 	//input of the table of URLs
 	for (int i = 0; i < V; i++) {
 		data[i] = list[i].getname();
 	}
 
-	//sorts the table of URLs
-	int z = sizeof(data) / sizeof(data[0]);
-	sort(data, data + z);
+	sort(data.begin(), data.end());
 
 	//in order to calculate the iterations, we use the formula: r(t+1) = M*r(t)
 	//M is a "matrix" of the links between the web pages. it contains 0 where there is no link and a number >0 if it does
@@ -202,6 +189,7 @@ int main() {
 	for (int i = 0; i < V; i++) 
 		r.push_back(pow(V, -1));
 
+	//this block of code adds every single instance of rows with other columns
 	for (int j = 0; j < iteration-1; j++) {
 		vector <double> sum(V);
 		for (int i = 0; i < V; i++) {
@@ -213,6 +201,18 @@ int main() {
 	}
 
 
+
+	//set doubles to only 2 decimals
+	cout << setprecision(2) << fixed << "\n";
+
+
+	//this prints the rank in alphabetical order
+	for (int i = 0; i < V; i++) 
+		for (int j = 0; j < V; j++) 
+			if (data[i] == list[j].getname())
+				cout << data[i] << " " << r[j] << "\n";
+		
+	
 
 
 	return 0;
