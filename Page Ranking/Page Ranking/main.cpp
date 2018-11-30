@@ -47,7 +47,7 @@ public:
 			temp->setnext(n);
 	}
 
-	double* inter(double r) {
+	vector<double> inter(double r, int V) {
 		
 		/*this method determines the number of pages linked to this node and returns
 		the result of the multiplication between this node's rank and the corrsponding
@@ -55,12 +55,14 @@ public:
 		*/
 
 		temp = next;
-		double *results = new double[sizeof(r)];
+		vector <double> results(V);
 		double num = rank * r;
 		
 		//every id located returns the value num on that index of r(t)
-		while (temp != NULL) 
+		while (temp != NULL) {
 			results[temp->getid() - 1] = num;
+			temp = temp->getnext();
+		}
 		
 		return results;
 	}
@@ -196,19 +198,22 @@ int main() {
 	//Since we are using an adjacency list, we are going to replicate the matrix multiplication using the nodes
 
 	//we initialize the entries of r(t) to 1/V where V is the number of pages
-	double* r = new double[V];
+	vector <double> r;
 	for (int i = 0; i < V; i++) 
-		r[i] = pow(V, -1);
+		r.push_back(pow(V, -1));
 
-	for (int j = 0; j < iteration; j++) {
-		double *sum = new double[V];
+	for (int j = 0; j < iteration-1; j++) {
+		vector <double> sum(V);
 		for (int i = 0; i < V; i++) {
-			double* medium = list[i].inter(r[i]);
+			vector <double> medium = list[i].inter(r[i],V);
 			for (int w = 0; w < V; w++)
 				sum[w] = sum[w] + medium[w];
 		}
 		r = sum;
 	}
+
+
+
 
 	return 0;
 }
