@@ -17,6 +17,7 @@ private:
 	int outdegree = 0;
 	Node* next = NULL;
 	Node* temp = next;
+
 public:
 	Node(string n, int i) {
 		name = n;
@@ -46,8 +47,22 @@ public:
 			temp->setnext(n);
 	}
 
-	int getdegree() {
-		return outdegree;
+	double* inter(double r) {
+		
+		/*this method determines the number of pages linked to this node and returns
+		the result of the multiplication between this node's rank and the corrsponding
+		value on matrix r(t)
+		*/
+
+		temp = next;
+		double *results = new double[sizeof(r)];
+		double num = rank * r;
+		
+		//every id located returns the value num on that index of r(t)
+		while (temp != NULL) 
+			results[temp->getid() - 1] = num;
+		
+		return results;
 	}
 
 };
@@ -162,17 +177,38 @@ int main() {
 		}
 	}
 
+	int V = list.size();
+
 	//table of URLs. Using an array
-	string* data = new string[list.size()];
+	string* data = new string[V];
 
 	//input of the table of URLs
-	for (int i = 0; i < list.size(); i++) {
+	for (int i = 0; i < V; i++) {
 		data[i] = list[i].getname();
 	}
 
 	//sorts the table of URLs
 	int z = sizeof(data) / sizeof(data[0]);
 	sort(data, data + z);
+
+	//in order to calculate the iterations, we use the formula: r(t+1) = M*r(t)
+	//M is a "matrix" of the links between the web pages. it contains 0 where there is no link and a number >0 if it does
+	//Since we are using an adjacency list, we are going to replicate the matrix multiplication using the nodes
+
+	//we initialize the entries of r(t) to 1/V where V is the number of pages
+	double* r = new double[V];
+	for (int i = 0; i < V; i++) 
+		r[i] = pow(V, -1);
+
+	for (int j = 0; j < iteration; j++) {
+		double *sum = new double[V];
+		for (int i = 0; i < V; i++) {
+			double* medium = list[i].inter(r[i]);
+			for (int w = 0; w < V; w++)
+				sum[w] = sum[w] + medium[w];
+		}
+		r = sum;
+	}
 
 	return 0;
 }
